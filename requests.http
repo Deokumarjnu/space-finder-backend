@@ -1,4 +1,5 @@
 
-GET https://98afmpwv0h.execute-api.us-east-1.amazonaws.com/prod/hello
+@endpoint = https://98afmpwv0h.execute-api.us-east-1.amazonaws.com/prod
+GET {{endpoint}}/hello
 
 ###
