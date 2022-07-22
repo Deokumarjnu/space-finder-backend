@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import { Code, Function as LambdaFunction, Runtime } from "aws-cdk-lib/aws-lambda"
 import { join } from 'path';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 
 
@@ -15,14 +16,19 @@ export class SpaceStack extends Stack {
     constructor(Scope: Construct, id: string, props: StackProps) {
         super(Scope, id, props);
 
-        const helloLambda = new LambdaFunction(this, 'hello-lambda', {
-            runtime: Runtime.NODEJS_14_X,
-            code: Code.fromAsset(join(__dirname, '..', 'services', 'hello')),
-            handler: 'hello.main'
-        });
+        // const helloLambda = new LambdaFunction(this, 'hello-lambda', {
+        //     runtime: Runtime.NODEJS_14_X,
+        //     code: Code.fromAsset(join(__dirname, '..', 'services', 'hello')),
+        //     handler: 'hello.main'
+        // });
+
+        const helloNodejsLambda = new NodejsFunction(this, 'NodejsLambda', {
+            entry: (join(__dirname, '..', 'services', 'node-lambda', 'hello.ts')),
+            handler: 'handler'
+        })
 
         // integrate helloLambda with RestApi
-        const helloLambdaIntegration = new LambdaIntegration(helloLambda);
+        const helloLambdaIntegration = new LambdaIntegration(helloNodejsLambda);
         const helloLambdaResourse = this.api.root.addResource('hello');
         helloLambdaResourse.addMethod('GET', helloLambdaIntegration);
 
