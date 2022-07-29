@@ -1,9 +1,9 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 // import { handler } from '../services/node-lambda/hello';
-// import { handler } from "../services/SpaceTable/create";
+import { handler } from "../services/SpaceTable/create";
 // import { handler } from "../services/SpaceTable/read";
 
-import { handler } from "../services/SpaceTable/update";
+// import { handler } from "../services/SpaceTable/update";
 
 // import { handler } from "../services/SpaceTable/delete";
 

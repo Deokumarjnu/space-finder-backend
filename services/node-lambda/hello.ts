@@ -1,4 +1,4 @@
-import { v4 } from "uuid";
+import { generateRandomId } from "../shared/utils";
 import { S3 } from "aws-sdk";
 const S3Client = new S3()
 async function handler(event: any, context: any) {
@@ -8,7 +8,7 @@ async function handler(event: any, context: any) {
     return {
         statusCode: 200,
         body: {
-            message: "Hello from node lambda!" + v4
+            message: "Hello from node lambda!" + generateRandomId()
         }
     }
 }

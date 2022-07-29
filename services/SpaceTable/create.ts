@@ -1,6 +1,7 @@
-import { v4 } from 'uuid';
+import { MissingFieldError, validateAsSpaceEntry } from './../shared/inputValidator';
 import { DynamoDB } from 'aws-sdk';
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { generateRandomId, getEventBody } from '../shared/utils';
 
 const dbClient = new DynamoDB.DocumentClient();
 
@@ -8,9 +9,6 @@ const TABLE_NAME = process.env.TABLE_NAME
 
 async function handler(event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> {
 
-    // take the body from event
-    const item = typeof event.body === 'object' ? event.body : JSON.parse(event.body);
-    item.spaceId = v4();
 
     const result: APIGatewayProxyResult = {
         statusCode: 200,
@@ -18,16 +16,26 @@ async function handler(event: APIGatewayProxyEvent, context: Context): Promise<A
     }
 
     try {
+        // take the body from event
+        const item = getEventBody(event)
+        item.spaceId = generateRandomId();
+        validateAsSpaceEntry(item);
         // insert into dynamodb
         await dbClient.put({
             TableName: TABLE_NAME!,
             Item: item
-        }).promise()
+        }).promise();
+        result.body = JSON.stringify(`Create item with id ${item.spaceId}`);
+
     } catch (error: any) {
+        if (error instanceof MissingFieldError) {
+            result.statusCode = 403
+        } else {
+            result.statusCode = 500
+        }
         result.body = error.message;
-        result.statusCode = 500
+
     }
-    result.body = JSON.stringify(`Create item with id ${item.spaceId}`);
     return result;
 };
 

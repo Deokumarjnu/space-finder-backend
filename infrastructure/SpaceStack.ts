@@ -48,6 +48,4 @@ export class SpaceStack extends Stack {
         spaceResource.addMethod('PUT', this.spacesTable.updateLambdaIntegration);
         spaceResource.addMethod('DELETE', this.spacesTable.deleteLambdaIntegration);
     }
-
-
-}
+};
