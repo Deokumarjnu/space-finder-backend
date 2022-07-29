@@ -1,14 +1,36 @@
 
 @endpoint = https://98afmpwv0h.execute-api.us-east-1.amazonaws.com/prod
-GET {{endpoint}}/hello/
 
+GET {{endpoint}}/hello/
 ###
 
+//Gell space by id
+GET {{endpoint}}/spaces?spaceId=9e28da07-b9fd-4e41-85c6-2efc1182d5f5
+###
+
+//Get all the spaces
+GET {{endpoint}}/spaces
+###
+
+//Get spaces by location
+GET {{endpoint}}/spaces?location=London
+###
+
+//Update data based on id
+PUT {{endpoint}}/spaces?spaceId=9e28da07-b9fd-4e41-85c6-2efc1182d5f5
+Content-Type: application/json
+
+{
+    "location": "New York!",
+}
+###
+
+//Create space
 POST {{endpoint}}/spaces/
 Content-Type: application/json
 
 {
-    "location": "London",
+    "location": "London!",
     "name": "Best location"
 }
 ###
