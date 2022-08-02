@@ -1,16 +1,26 @@
-import { generateRandomId } from "../shared/utils";
-import { S3 } from "aws-sdk";
-const S3Client = new S3()
-async function handler(event: any, context: any) {
-    const bucketList = await S3Client.listBuckets().promise()
-    console.log("Got an event - bucketList!");
-    console.log(bucketList);
-    return {
-        statusCode: 200,
-        body: {
-            message: "Hello from node lambda!" + generateRandomId()
+import { Context } from 'aws-lambda';
+import { APIGatewayProxyEvent } from 'aws-lambda';
+
+async function handler(event: APIGatewayProxyEvent, context: Context) {
+    if (isAuthorized(event)) {
+        return {
+            statusCode: 200,
+            body: JSON.stringify('You are authorized')
+        }
+    } else {
+        return {
+            statusCode: 401,
+            body: JSON.stringify('You are NOT authorized')
         }
     }
+}
+
+function isAuthorized(event: APIGatewayProxyEvent) {
+    const groups = event.requestContext.authorizer?.claims['cognito:groups'];
+    if (groups) {
+        return (groups as string).includes('admins')
+    }
+    return false
 }
 
 export { handler }

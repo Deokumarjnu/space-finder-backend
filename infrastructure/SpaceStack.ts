@@ -1,16 +1,18 @@
-import { GenericTable } from './GenericTable';
+
 import { Stack, StackProps } from 'aws-cdk-lib'
 import { Construct } from 'constructs';
 // import { Code, Function as LambdaFunction, Runtime } from "aws-cdk-lib/aws-lambda"
 import { join } from 'path';
-import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { AuthorizationType, LambdaIntegration, MethodOptions, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
-
+import { AuthorizerWrapper } from './auth/authorizer-wrapper';
+import { GenericTable } from './GenericTable';
 
 export class SpaceStack extends Stack {
 
     private api = new RestApi(this, 'SpaceApi');
+    private authorizer: AuthorizerWrapper;
 
     private spacesTable = new GenericTable(this, {
         tableName: 'SpaceTable',
@@ -25,11 +27,14 @@ export class SpaceStack extends Stack {
     constructor(Scope: Construct, id: string, props: StackProps) {
         super(Scope, id, props);
 
-        // const helloLambda = new LambdaFunction(this, 'hello-lambda', {
-        //     runtime: Runtime.NODEJS_14_X,
-        //     code: Code.fromAsset(join(__dirname, '..', 'services', 'hello')),
-        //     handler: 'hello.main'
-        // });
+        this.authorizer = new AuthorizerWrapper(this, this.api);
+
+        const optionWithAuthorizer: MethodOptions = {
+            authorizationType: AuthorizationType.COGNITO,
+            authorizer: {
+                authorizerId: this.authorizer.authorizer.authorizerId
+            }
+        };
 
         const helloNodejsLambda = new NodejsFunction(this, 'NodejsLambda', {
             entry: (join(__dirname, '..', 'services', 'node-lambda', 'hello.ts')),
@@ -39,7 +44,7 @@ export class SpaceStack extends Stack {
         // Integrate helloLambda with RestApi
         const helloLambdaIntegration = new LambdaIntegration(helloNodejsLambda);
         const helloLambdaResourse = this.api.root.addResource('hello');
-        helloLambdaResourse.addMethod('GET', helloLambdaIntegration);
+        helloLambdaResourse.addMethod('GET', helloLambdaIntegration, optionWithAuthorizer);
 
         //Spaces API integrations:
         const spaceResource = this.api.root.addResource('spaces');
